@@ -256,8 +256,22 @@ export const CustomRules = (props) => {
             jsonValid: false,
             
             init() {
-              // Watch for changes in rules to update JSON content
+              const savedRules = localStorage.getItem('customRules');
+              if (savedRules) {
+                try {
+                  const parsed = JSON.parse(savedRules);
+                  if (Array.isArray(parsed)) {
+                    this.rules = parsed;
+                  }
+                } catch {
+                  // Keep the empty defaults when stored JSON is invalid.
+                }
+              }
+              this.jsonContent = JSON.stringify(this.rules, null, 2);
+
+              // Watch for changes in rules to update JSON content and local storage
               this.$watch('rules', (value) => {
+                localStorage.setItem('customRules', JSON.stringify(value));
                 if (this.mode === 'form') {
                   this.jsonContent = JSON.stringify(value, null, 2);
                 }
