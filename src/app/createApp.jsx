@@ -340,7 +340,14 @@ export function createApp(bindings = {}) {
             if (!originalParam) return c.text('Short URL not found', 404);
 
             const url = new URL(c.req.url);
-            return c.redirect(`${url.origin}/${prefix}${originalParam}`);
+            const headers = new Headers();
+            const acceptLanguage = getRequestHeader(c.req, 'Accept-Language');
+            const userAgent = getRequestHeader(c.req, 'User-Agent');
+            if (acceptLanguage) headers.set('Accept-Language', acceptLanguage);
+            if (userAgent) headers.set('User-Agent', userAgent);
+
+            const request = new Request(`${url.origin}/${prefix}${originalParam}`, { headers });
+            return app.fetch(request, c.env);
         } catch (error) {
             return handleError(c, error, runtime.logger);
         }
